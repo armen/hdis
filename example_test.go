@@ -20,14 +20,16 @@ func ExampleGet() {
 
 	fmt.Printf("%v\n", value)
 
-	// Delete the hash
-	_, err := hc.Do("HDEL", key)
-	if err != nil {
-		fmt.Println(err)
+	// Delete the hash if it exists
+	if exists, _ := redis.Bool(hc.Do("HEXISTS", key)); exists {
+		_, err := hc.Do("HDEL", key)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	// Execute invalid hash command
-	_, err = hc.Do("GET", "sample-key")
+	_, err := hc.Do("GET", "sample-key")
 	if err == hdis.NotAHashCommandError {
 		fmt.Println("Invalid hash command")
 	} else {
