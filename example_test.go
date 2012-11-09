@@ -18,6 +18,23 @@ func ExampleGet() {
 	hc.Set(key, "The value")
 	value, _ := redis.String(hc.Get(key))
 
-	fmt.Printf("%v", value)
-	// Output: The value
+	fmt.Printf("%v\n", value)
+
+	// Delete the hash
+	_, err := hc.Do("HDEL", key)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Execute invalid hash command
+	_, err = hc.Do("GET", "sample-key")
+	if err == hdis.NotAHashCommandError {
+		fmt.Println("Invalid hash command")
+	} else {
+		fmt.Println(err)
+	}
+
+	// Output:
+	// The value
+	// Invalid hash command
 }

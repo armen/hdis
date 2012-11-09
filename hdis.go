@@ -6,12 +6,15 @@ package hdis
 import (
 	"github.com/garyburd/redigo/redis"
 
+	"errors"
 	"strings"
 )
 
 type Conn struct {
-	redis.Conn
+	Conn redis.Conn
 }
+
+var NotAHashCommandError = errors.New("Given command is not a hash command")
 
 func getKeyField(bigkey string) (key, field string) {
 
@@ -33,11 +36,27 @@ func getKeyField(bigkey string) (key, field string) {
 }
 
 func (c Conn) Get(bigkey string) (interface{}, error) {
-	key, field := getKeyField(bigkey)
-	return c.Do("HGET", key, field)
+	return c.Do("HGET", bigkey)
 }
 
 func (c Conn) Set(bigkey string, value interface{}) (interface{}, error) {
+	return c.Do("HSET", bigkey, value)
+}
+
+func (c Conn) Do(commandName string, bigkey string, args ...interface{}) (interface{}, error) {
+
+	if !strings.HasPrefix(commandName, "H") {
+		return nil, NotAHashCommandError
+	}
+
 	key, field := getKeyField(bigkey)
-	return c.Do("HSET", key, field, value)
+
+	switch strings.ToUpper(commandName) {
+	case "HGETALL", "HKEYS", "HLEN", "HVALS":
+		arguments := append([]interface{}{key}, args...)
+		return c.Conn.Do(commandName, arguments...)
+	}
+
+	arguments := append([]interface{}{key, field}, args...)
+	return c.Conn.Do(commandName, arguments...)
 }
