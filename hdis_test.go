@@ -11,7 +11,7 @@ type KeyTest struct {
 }
 
 var keyTests = []KeyTest{
-	{"object", "", ""},
+	{"object", "object", ""},
 	{"object:1", "object:", "1"},
 	{"object:12", "object:", "12"},
 	{"object:123", "object:12", "3"},

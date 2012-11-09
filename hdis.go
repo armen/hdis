@@ -18,7 +18,7 @@ func getKeyField(bigkey string) (key, field string) {
 	parts := strings.SplitN(bigkey, ":", 2)
 
 	if len(parts) != 2 {
-		return
+		return bigkey, field
 	}
 
 	if len(parts[1]) > 2 {
